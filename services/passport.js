@@ -22,18 +22,15 @@ passport.use(
     clientSecret: keys.googleClientSecret,
     callbackURL: 'https://tranquil-ocean-00612.herokuapp.com/auth/google/callback',
     proxy: true
-    }, (accessToken, refreshToken, profile, done)=> {
-        User.findOne({ googleId: profile.id})
-            .then((existingUser) => {
-                if (existingUser) {
-                    // User Already Exists
-                    done(null, existingUser);
-                } else {
-                    // No User Record
-                    new User({ googleId: profile.id })
-                        .save()
-                        .then(savedUser => done(null, savedUser));
-                }
-            })
+    }, async (accessToken, refreshToken, profile, done) => {
+        const existingUser = await User.findOne({ googleId: profile.id});
+
+        if (existingUser) {
+            return done(null, existingUser);
+        } 
+            
+        const savedUser = await new User({ googleId: profile.id }).save();
+        done(null, savedUser);
+
     })
 );
